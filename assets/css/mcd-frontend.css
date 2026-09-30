@@ -1,0 +1,107 @@
+/**
+ * Multi-Column Dropdowns – front-end layout.
+ *
+ * Approach: "grid only while open".
+ * OceanWP, Superfish-style scripts and Elementor's SmartMenus decide WHEN a dropdown is
+ * visible by toggling `display: none` / `display: block`. This file never sets `display`
+ * on a resting (closed) sub-menu. It only:
+ *   1. declares grid geometry, which is inert while the element is `block` or `none`;
+ *   2. switches `display` to `grid` in selectors that can only match while the theme
+ *      itself is showing the dropdown.
+ *
+ * Values come from custom properties printed on the parent <li>:
+ *   --mcd-cols, --mcd-rows, --mcd-col-gap, --mcd-row-gap, --mcd-width
+ * plus optional per-device variants (e.g. --mcd-rows-tablet) that a small inline block,
+ * generated from the site's Elementor breakpoints, resolves after this file.
+ *
+ * Mobile menus are excluded everywhere with :not(... *):
+ * OceanWP #mobile-dropdown, #sidr, #mobile-fullscreen and Elementor's toggle menu.
+ */
+
+/* 1. Resolved values (per-device overrides are appended inline). */
+.mcd-enabled > .sub-menu {
+	--_mcd-cols: var(--mcd-cols, 2);
+	--_mcd-rows: var(--mcd-rows, 1);
+	--_mcd-col-gap: var(--mcd-col-gap, 24px);
+	--_mcd-row-gap: var(--mcd-row-gap, 0px);
+	--_mcd-width: var(--mcd-width, max-content);
+}
+
+/* 2. Grid geometry. Has no effect until `display` is `grid`. Items flow top to bottom, then into the next column. */
+.mcd-enabled:not(#mobile-dropdown *, #sidr *, #mobile-fullscreen *, .elementor-nav-menu__container.elementor-nav-menu--dropdown *) > .sub-menu {
+	grid-auto-flow: column;
+	grid-template-rows: repeat(var(--_mcd-rows), auto);
+	grid-template-columns: repeat(var(--_mcd-cols), minmax(0, 1fr));
+	grid-auto-columns: minmax(0, 1fr);
+	align-content: start;
+	column-gap: var(--_mcd-col-gap);
+	row-gap: var(--_mcd-row-gap);
+	box-sizing: border-box;
+}
+
+/* Dropdown width, kept inside the viewport. !important beats the inline widths SmartMenus writes. */
+.mcd-enabled:not(#mobile-dropdown *, #sidr *, #mobile-fullscreen *, .elementor-nav-menu__container.elementor-nav-menu--dropdown *, .mcd-static-menu *) > .sub-menu {
+	width: var(--_mcd-width) !important;
+	max-width: calc(100vw - 2 * var(--mcd-edge-gutter, 16px)) !important;
+}
+
+/* Static widget lists stay inside their column. */
+.mcd-static-menu .mcd-enabled:not(#mobile-dropdown *, #sidr *, #mobile-fullscreen *) > .sub-menu {
+	width: var(--_mcd-width);
+	max-width: 100%;
+}
+
+/* Grid items. */
+.mcd-enabled:not(#mobile-dropdown *, #sidr *, #mobile-fullscreen *, .elementor-nav-menu__container.elementor-nav-menu--dropdown *) > .sub-menu > li {
+	min-width: 0;
+	float: none;
+}
+
+.mcd-enabled:not(#mobile-dropdown *, #sidr *, #mobile-fullscreen *, .elementor-nav-menu__container.elementor-nav-menu--dropdown *) > .sub-menu > li > a {
+	white-space: normal;
+}
+
+/*
+ * 3a. Script-driven menus (Elementor SmartMenus, Superfish, OceanWP scripts).
+ * The script has written `display: block` inline, so the menu is open. This selector
+ * cannot match a closed menu, which is why !important (needed to beat the inline style) is safe.
+ * When the script closes the menu it writes `display: none` and this stops matching.
+ */
+.mcd-enabled:not(#mobile-dropdown *, #sidr *, #mobile-fullscreen *, .elementor-nav-menu__container.elementor-nav-menu--dropdown *) > .sub-menu[style*="display: block"],
+.mcd-enabled:not(#mobile-dropdown *, #sidr *, #mobile-fullscreen *, .elementor-nav-menu__container.elementor-nav-menu--dropdown *) > .sub-menu[style*="display:block"] {
+	display: grid !important;
+}
+
+/*
+ * 3b. Stylesheet-driven dropdowns: the theme's own open triggers.
+ * No !important: an inline `display: none` written by a theme script always wins.
+ * SmartMenus/Elementor menus are excluded because they only open through their script.
+ */
+.mcd-enabled.sfHover:not(#mobile-dropdown *, #sidr *, #mobile-fullscreen *, .elementor-nav-menu *, .mcd-static-menu *) > .sub-menu {
+	display: grid;
+}
+
+body:not(.mcd-scripts-only) .mcd-enabled:not(#mobile-dropdown *, #sidr *, #mobile-fullscreen *, .elementor-nav-menu *, [data-smartmenus-id] *, .mcd-static-menu *):is(:hover, :focus-within) > .sub-menu {
+	display: grid;
+}
+
+/* 3c. Static widget lists: the sub-menu is always shown, so it is always a grid (an inline display:none still wins). */
+.mcd-static-menu .mcd-enabled:not(#mobile-dropdown *, #sidr *, #mobile-fullscreen *) > .sub-menu {
+	display: grid;
+}
+
+/* 4. Viewport edge handling (set by mcd-frontend.js). `translate` composes with any theme `transform` animation. */
+.mcd-enabled.mcd-shifted > .sub-menu {
+	translate: var(--mcd-shift, 0px) 0;
+}
+
+/* Third-level flyouts that would leave the screen open to the other side. */
+.mcd-enabled .sub-menu .mcd-flyout-left > .sub-menu {
+	left: auto !important;
+	right: 100% !important;
+}
+
+.mcd-enabled .sub-menu .mcd-flyout-right > .sub-menu {
+	right: auto !important;
+	left: 100% !important;
+}

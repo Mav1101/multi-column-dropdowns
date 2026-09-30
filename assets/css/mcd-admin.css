@@ -1,0 +1,46 @@
+/**
+ * Multi-Column Dropdowns – admin styles (Appearance → Menus).
+ */
+
+.mcd-fields {
+	clear: both;
+	box-sizing: border-box;
+	margin: 8px 0 10px;
+	padding: 8px 12px 4px;
+	border: 1px solid #dcdcde;
+	background: #f6f7f7;
+}
+
+.mcd-fields.hidden-field {
+	display: none;
+}
+
+/* The layout applies to top-level items only. */
+.menu-item:not(.menu-item-depth-0) .mcd-fields {
+	display: none;
+}
+
+.mcd-fields legend {
+	padding: 0 4px;
+	font-weight: 600;
+}
+
+.mcd-fields .mcd-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+	gap: 0 12px;
+}
+
+.mcd-fields .mcd-field {
+	margin: 6px 0;
+}
+
+.mcd-fields input[type="number"],
+.mcd-fields input[type="text"] {
+	width: 100%;
+}
+
+.mcd-fields .mcd-help {
+	margin: 4px 0 8px;
+	font-style: normal;
+}
